@@ -71,17 +71,26 @@ app.use(converter());
 // app.get('/pi/sensors/humidity', function(req, res){
 //   res.sendFile('humidity.html', { root: './resources' });
 // });
-const MongoClient = require('mongodb').MongoClient;
 app.set('view engine', 'ejs')
-var db
+const MongoClient = require('mongodb').MongoClient;
+var db, userCollection;
 const url = 'mongodb+srv://tommyfan:cnurobot@garderdb-ityx5.mongodb.net'
 MongoClient.connect(url, (err, client) => {
   // ... start the server
   if (err) return console.log(err)
   db = client.db('gardenDB') // whatever your database name is
   console.log("server connect to mongdb!!!!")
- 
+  //record to collection resource in mongodb
+  userCollection = db.collection('resources');
+  dbrecord();
 })
+
+function dbrecord() {
+    userCollection.insert({
+      "Air_temperature": resources.pi.sensors.temperature.value, "Air_humidity": resources.pi.sensors.humidity.value, "Soil_humidity": resources.pi.sensors.soil.value
+  })
+     setTimeout(dbrecord, 1000);	
+}
 app.get('/index', (req, res) => {
   require('connect-ensure-login').ensureLoggedIn(),
     // res.sendFile(__dirname + '/index.html')
@@ -89,7 +98,7 @@ app.get('/index', (req, res) => {
     // Mine was '/Users/zellwk/Projects/demo-repos/crud-express-mongo' for this app.
     //  db.collection('temperature').find().toArray((err, result) => {
     //  if (err) return console.log(err)
-    res.render('index.ejs', { user: req.user, resources: resources})
+    res.render('index.ejs', { user: req.user, resources: resources })
   //  })
 })
 
@@ -131,10 +140,9 @@ app.post('/update_data', (req, res) => {
 })
 
 app.post('/openValve', (req, res) => {
-  if(resources.pi.sensors.soil.value<=650){
-  resources.pi.actuators.valve.status = !resources.pi.actuators.valve.status;
-  console.log("VALVE STATUS CHANGE TO " + resources.pi.actuators.valve.status);
-  }
+    resources.pi.actuators.valve.control = !resources.pi.actuators.valve.control;
+    resources.pi.actuators.valve.status = !resources.pi.actuators.valve.status;
+    console.log("VALVE STATUS CHANGE TO " + resources.pi.actuators.valve.status);
   res.redirect('/index')
 })
 
@@ -164,14 +172,14 @@ app.post('/setTime', (req, res) => {
   // rule.second = 1;
   console.log("setting time!!!!!!!!!!!!!!!!!!!!")
   // if (!resources.pi.actuators.valve.status) {
-    var j = schedule.scheduleJob(rule, function () {
-      console.log('Scheduler(Valve) is start running on: ' + resources.pi.timer.weekofdays + "  " + resources.pi.timer.hour + "  " + resources.pi.timer.minute);
-      // if(resources.pi.sensors.soil.value<=650){
-      actuator.writeSync(1);
-        console.info('!!!!!!!!!!!!!!!!!Open valve ');
-      resources.pi.actuators.valve.status = true;
-      // }
-    });
+  var j = schedule.scheduleJob(rule, function () {
+    console.log('Scheduler(Valve) is start running on: ' + resources.pi.timer.weekofdays + "  " + resources.pi.timer.hour + "  " + resources.pi.timer.minute);
+    // if(resources.pi.sensors.soil.value<=650){
+    actuator.writeSync(1);
+    console.info('!!!!!!!!!!!!!!!!!Open valve ');
+    resources.pi.actuators.valve.status = true;
+    // }
+  });
   // }
   console.log("weekdays " + resources.pi.timer.weekofdays);
   console.log("hour" + resources.pi.timer.hour);
