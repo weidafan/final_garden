@@ -140,12 +140,20 @@ app.post('/update_data', (req, res) => {
 })
 
 app.post('/openValve', (req, res) => {
-    resources.pi.actuators.valve.control = !resources.pi.actuators.valve.control;
+    if(resources.pi.actuators.valve.control==1)
+      {resources.pi.actuators.valve.control=0}
+    else{
+      resources.pi.actuators.valve.control=1;
+    }
     resources.pi.actuators.valve.status = !resources.pi.actuators.valve.status;
-    console.log("VALVE STATUS CHANGE TO " + resources.pi.actuators.valve.status);
+    console.log("VALVE SET TO MANUAL CONTROL" + resources.pi.actuators.valve.status);
   res.redirect('/index')
 })
-
+app.post('/auto', (req, res) => {
+      resources.pi.actuators.valve.control=-1;
+    console.log("VALVE HAS SET TO AUTO CONTROL" + resources.pi.actuators.valve.status);
+  res.redirect('/index')
+})
 app.post('/setTime', (req, res) => {
   resources.pi.timer.weekofdays[0] = req.body.Sunday;
   resources.pi.timer.weekofdays[1] = req.body.Monday;

@@ -58,6 +58,7 @@
       "valve": {
         "name": "solenoid water valve",
         "status": false,
+        "control":-1,
         "gpio": 17
       }
     }
