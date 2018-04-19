@@ -29,11 +29,19 @@ function connectHardware() {
   Valve = new Gpio(model.gpio, 'out');
   // switchOnOff(model.value);
     console.log("The Valve status is: "+model.status);
+    if(resources.pi.sensors.soil.control){
+       Valve.writeSync(1);
+    }
+    else if(!resources.pi.sensors.soil.control){
+          Valve.writeSync(0);
+    }
+    else{
     if(model.status && resources.pi.sensors.soil.value <=650){
     Valve.writeSync(1);
     }
     else if(!model.status || resources.pi.sensors.soil.value>700){
     Valve.writeSync(0);
+    }
     }
     setTimeout(connectHardware, localParams.frequency);	
 };

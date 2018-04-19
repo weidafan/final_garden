@@ -26,7 +26,7 @@ exports.stop = function () {
 
 function connectHardware() {
   var Gpio = require('onoff').Gpio;
-  led = new Gpio(27, 'out');
+  led = new Gpio(27, 'out',);
   // switchOnOff(model.value);
     console.log("The LED status is: "+model.value);
     if(model.value){
